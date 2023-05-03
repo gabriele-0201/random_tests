@@ -1,0 +1,1 @@
+primes = sieve [2..]
