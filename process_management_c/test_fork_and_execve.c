@@ -31,9 +31,9 @@ void spawn_process(int type) {
     // CHILD PROCESS
     printf("Hello from the child process\n");
 
-    dup2(channels[1], STDOUT_FILENO);
-    close(channels[0]);
-    close(channels[1]);
+    // dup2(channels[1], STDOUT_FILENO);
+    // close(channels[0]);
+    // close(channels[1]);
 
     int res_exexve;
     if ((res_exexve = execve("fork", NULL, envp)) == -1) {
@@ -43,7 +43,7 @@ void spawn_process(int type) {
     // PARENT PROCESS
     close(channels[1]);
     int nbytes = read(channels[0], read_buffer, sizeof(read_buffer));
-    printf("Fork process Output:\n\n%.*s\n\n", nbytes, read_buffer);
+    // printf("Fork process Output:\n\n%.*s\n\n", nbytes, read_buffer);
 
     printf("Back in the parent from FIRST fork \n");
   }
