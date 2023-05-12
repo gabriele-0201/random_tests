@@ -4,13 +4,8 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/socket.h>
-<<<<<<< HEAD
 #include <sys/stat.h>
 #include <sys/types.h> /* See NOTES */
-#include <sys/types.h>
-=======
-#include <sys/types.h> /* See NOTES */
->>>>>>> 5df2872 (Simple Web Server Implementation)
 #include <unistd.h>
 
 char split_until_space(char **new_str, char **str);
@@ -85,7 +80,6 @@ int main() {
 
     printf("ready to parse the request \n");
 
-<<<<<<< HEAD
     /*
       What will do the server??
       will parse the response and if the client is requesting a file
@@ -103,8 +97,6 @@ int main() {
       of the invoked process to the socket output stream
       */
 
-=======
->>>>>>> 5df2872 (Simple Web Server Implementation)
     // headers[0].n = header_buf;
     int header_index = 0;
     for (int i = 0; read(client_socket, header_buf + i, 1); i++) {
@@ -173,12 +165,15 @@ int main() {
         //   sprintf(path, "/tmp");
         // }
 
-<<<<<<< HEAD
         struct stat sb;
         if (stat(path, &sb) == 0 && sb.st_mode & S_IXUSR) {
           // the file in the path is an executbale
 
           printf("Executable file \n");
+
+          int channels[2];
+          char read_buffer[10000];
+          pipe(channels);
 
           pid_t res_fork = fork();
           if (res_fork == -1) {
@@ -190,13 +185,19 @@ int main() {
             // child process
             printf("Child process!! Let's call the new process! \n");
 
+            // TEST
+            // dup2(channels[1], STDOUT_FILENO);
+            // close(channels[0]);
+            // close(channels[1]);
+
             // connection between the standard output and the client socket
             dup2(client_socket, STDOUT_FILENO);
             // closing the client socket file descripto, now the only
             // way to write the client is thorugh the std out
             //
             // when the porcess will end then also the std out will be closed
-            close(client_socket);
+
+            // close(client_socket);
             int res_exexve;
             if ((res_exexve = execve(path, NULL, NULL)) == -1) {
               fprintf(stderr, "an error occur executing the process\n");
@@ -209,7 +210,22 @@ int main() {
             //
             // PROBLEM -> is possible that accepting new connection is a prblem
             // because the client socket is never really closed?
+
+            // TEST
+            // close(channels[1]);
+            // int nbytes = read(channels[0], read_buffer, sizeof(read_buffer));
+            // printf("Fork process Output:\n\n%.*s\n\n", nbytes, read_buffer);
+
             printf("Parent process!! Let's continue!");
+            // I have to close this ALSO in the parent because
+            // the file descriptor are shared between process (created with
+            // fork) and also whene execve is used -> the kernel keeps a
+            // refecence counter of the file descriptr and each process contain
+            // only a referece to the real file descriptor struct
+            //
+            // SO to close it properly after the fork the client_socket needs to
+            // be closed either in the parent and in the child
+            close(client_socket);
             continue;
           }
         } else {
@@ -220,17 +236,6 @@ int main() {
             sprintf(response_buf, "HTTP/1.0 200 OK\r\n\r\n");
           }
         }
-
-=======
-        printf("Ok we are in a GET \n");
-
-        if ((file = fopen(path, "rt")) == NULL)
-          sprintf(response_buf, "HTTP/1.1 404 Not Found\r\n\r\n");
-        else {
-          sprintf(response_buf, "HTTP/1.0 200 OK\r\n\r\n");
-          write(client_socket, response_buf, strlen(response_buf));
-        }
->>>>>>> 5df2872 (Simple Web Server Implementation)
       } else {
         sprintf(response_buf, "HTTP/1.1  501 Not Implemented\r\n\r\n");
       }
@@ -279,6 +284,7 @@ char split_until_space(char **new_str, char **str) {
 }
 
 // exit the process and print the error if val is -1
+
 void handle_error(int val, char *str) {
   if (val == 1) {
     printf("%s", str);

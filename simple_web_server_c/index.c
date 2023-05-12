@@ -23,14 +23,21 @@ int main(int argc, char *argv[], char *env[]) {
   }
 
   // write in the socket the response buffer
-  fprintf(stdout, response_buf, strlen(response_buf));
+  // fprintf(stdout, response_buf, strlen(response_buf));
+  printf(response_buf, strlen(response_buf));
 
   // write in the socket the optional body
   if (file != NULL) {
     char ch;
     while (EOF != (ch = fgetc(file))) {
-      fprintf(stdout, &ch, 1);
+      // fprintf(stdout, &ch, 1);
+      printf(&ch, 1);
     }
     fclose(file);
   }
+
+  // here the stdout is binded to the client_socket
+  // the end of the process mean also the closing of the stdout
+  // and also of the client_socket
+  // close(stdout);
 }
