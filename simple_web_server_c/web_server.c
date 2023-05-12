@@ -4,7 +4,13 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/socket.h>
+<<<<<<< HEAD
+#include <sys/stat.h>
 #include <sys/types.h> /* See NOTES */
+#include <sys/types.h>
+=======
+#include <sys/types.h> /* See NOTES */
+>>>>>>> 5df2872 (Simple Web Server Implementation)
 #include <unistd.h>
 
 char split_until_space(char **new_str, char **str);
@@ -79,6 +85,26 @@ int main() {
 
     printf("ready to parse the request \n");
 
+<<<<<<< HEAD
+    /*
+      What will do the server??
+      will parse the response and if the client is requesting a file
+      then the server will responde with the file
+
+      otherwise if the client is a asking for an executable (example '/home')
+      the server will run the backend procecess that will run the home program
+      the home program will be able to parse the remaining part of the request
+      and then responde to the client
+
+      for this process should be enough to parse only the status line to
+      understand which process to call
+
+      FOR NOW -> the only thig that will be done is just to redirect the output
+      of the invoked process to the socket output stream
+      */
+
+=======
+>>>>>>> 5df2872 (Simple Web Server Implementation)
     // headers[0].n = header_buf;
     int header_index = 0;
     for (int i = 0; read(client_socket, header_buf + i, 1); i++) {
@@ -147,6 +173,55 @@ int main() {
         //   sprintf(path, "/tmp");
         // }
 
+<<<<<<< HEAD
+        struct stat sb;
+        if (stat(path, &sb) == 0 && sb.st_mode & S_IXUSR) {
+          // the file in the path is an executbale
+
+          printf("Executable file \n");
+
+          pid_t res_fork = fork();
+          if (res_fork == -1) {
+            printf("FAILED fork -> impossible spawn new process");
+            // TODO not implemented is not correct but I do not know the code
+            // for an error on the server side
+            sprintf(response_buf, "HTTP/1.1  501 Not Implemented\r\n\r\n");
+          } else if (res_fork == 0) {
+            // child process
+            printf("Child process!! Let's call the new process! \n");
+
+            // connection between the standard output and the client socket
+            dup2(client_socket, STDOUT_FILENO);
+            // closing the client socket file descripto, now the only
+            // way to write the client is thorugh the std out
+            //
+            // when the porcess will end then also the std out will be closed
+            close(client_socket);
+            int res_exexve;
+            if ((res_exexve = execve(path, NULL, NULL)) == -1) {
+              fprintf(stderr, "an error occur executing the process\n");
+            }
+          } else {
+            // parent process
+            // the connection must be mantained and closed by the child now,
+            // everything is in his hands, I only have to continue accepting new
+            // connection now
+            //
+            // PROBLEM -> is possible that accepting new connection is a prblem
+            // because the client socket is never really closed?
+            printf("Parent process!! Let's continue!");
+            continue;
+          }
+        } else {
+          // The file could be a standard file, let's try to open it
+          if ((file = fopen(path, "rt")) == NULL)
+            sprintf(response_buf, "HTTP/1.1 404 Not Found\r\n\r\n");
+          else {
+            sprintf(response_buf, "HTTP/1.0 200 OK\r\n\r\n");
+          }
+        }
+
+=======
         printf("Ok we are in a GET \n");
 
         if ((file = fopen(path, "rt")) == NULL)
@@ -155,6 +230,7 @@ int main() {
           sprintf(response_buf, "HTTP/1.0 200 OK\r\n\r\n");
           write(client_socket, response_buf, strlen(response_buf));
         }
+>>>>>>> 5df2872 (Simple Web Server Implementation)
       } else {
         sprintf(response_buf, "HTTP/1.1  501 Not Implemented\r\n\r\n");
       }
