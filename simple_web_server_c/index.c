@@ -10,6 +10,10 @@
 
 int main(int argc, char *argv[], char *env[]) {
 
+  for (int i = 0; i < argc; i++) {
+    printf("%s \n", argv[i]);
+  }
+
   // printf("Index process started");
 
   char response_buf[1000];
@@ -24,14 +28,15 @@ int main(int argc, char *argv[], char *env[]) {
 
   // write in the socket the response buffer
   // fprintf(stdout, response_buf, strlen(response_buf));
-  printf(response_buf, strlen(response_buf));
+  printf("%s", response_buf);
+  // printf("MANDIII \r\n");
 
   // write in the socket the optional body
   if (file != NULL) {
     char ch;
     while (EOF != (ch = fgetc(file))) {
       // fprintf(stdout, &ch, 1);
-      printf(&ch, 1);
+      printf("%c", ch);
     }
     fclose(file);
   }

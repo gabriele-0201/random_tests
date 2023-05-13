@@ -8,7 +8,7 @@
 #include <sys/types.h> /* See NOTES */
 #include <unistd.h>
 
-char split_until_space(char **new_str, char **str);
+char split_until_char(char **new_str, char **str, char ch);
 void handle_error(int val, char *str);
 
 // Containers of the header and status line
@@ -147,9 +147,10 @@ int main() {
 
     // Request line:  <method> <SP> <URL><SP> <HTTP-ver><CRLF>
     // Parsing the status line, if an error is found than return 400
-    char status_line_parsing_res = split_until_space(&method, &status_line) &&
-                                   split_until_space(&path, &status_line) &&
-                                   !split_until_space(&version, &status_line);
+    char status_line_parsing_res =
+        split_until_char(&method, &status_line, ' ') &&
+        split_until_char(&path, &status_line, ' ') &&
+        !split_until_char(&version, &status_line, ' ');
 
     if (status_line_parsing_res) {
       printf("Method = %s, path = %s, version = %s \n", method, path, version);
@@ -164,6 +165,19 @@ int main() {
         //   system(command);
         //   sprintf(path, "/tmp");
         // }
+
+        // IF there are parameters than those shoul be extrapolated
+        // and given to the script through the command line argumentsa
+        //
+        // the args will remain on the request buffer because on the
+        // execve it should not be freed
+        //
+        char *get_args[100];
+        char *ptr_in_path = path;
+        split_until_char(&path, &ptr_in_path, '?');
+        int arg_count = 0;
+        while (split_until_char(&get_args[arg_count++], &ptr_in_path, '&'))
+          ;
 
         struct stat sb;
         if (stat(path, &sb) == 0 && sb.st_mode & S_IXUSR) {
@@ -199,7 +213,9 @@ int main() {
 
             // close(client_socket);
             int res_exexve;
-            if ((res_exexve = execve(path, NULL, NULL)) == -1) {
+            // Should also fulfill the environment variable with the
+            // meta-variable
+            if ((res_exexve = execve(path, get_args, NULL)) == -1) {
               fprintf(stderr, "an error occur executing the process\n");
             }
           } else {
@@ -272,9 +288,9 @@ int main() {
 //
 // return 1 if finds a space
 // return 0 if the string ends
-char split_until_space(char **new_str, char **str) {
+char split_until_char(char **new_str, char **str, char ch) {
   *new_str = *str;
-  for (; **str && **str != ' '; (*str)++)
+  for (; **str && **str != ch; (*str)++)
     ;
   if (!**str)
     return 0;
