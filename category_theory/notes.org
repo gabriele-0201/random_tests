@@ -1,0 +1,32 @@
+#+TITLE: Category Theory for programmers - NOTES
+
+* The essence of composition
+A category consists of
++ Objects
++ Morphism (Arrows) that goes from one object to another
+
+** Composition
+Arrows can be composed
+
+#BEGIN_SRC haskell
+f :: A -> B
+
+g :: B -> C
+
+g . f -- This is the composition of two morphism
+#END_SRC
+
+Properties of composition:
+
++ Associative
+  You don't need parenthesis
++ Identity
+  Called Unit of composition, a morphism that loops on an object
+
+  composing a function with an identiy result in the same function
+
+  f :: A -> B
+
+  Id_B . f  == f
+
+  f . Id_A  == f
